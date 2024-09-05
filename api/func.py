@@ -1,8 +1,10 @@
 from datetime import datetime
+import pytz
 
+timezone = pytz.timezone('America/New_York')
 
 def check_if_current(fedtype: str, fedDate: datetime):
-  now = datetime.now()
+  now = datetime.now(timezone)
 
   if fedDate.date() != now.date():
     return False
@@ -14,7 +16,7 @@ def check_if_current(fedtype: str, fedDate: datetime):
   return True
 
 def fed_type():
-  now = datetime.now()
+  now = datetime.now(timezone)
   if now.hour <= 12:
     return 'breakfast'
   else:

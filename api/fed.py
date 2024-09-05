@@ -4,8 +4,11 @@ from .models import Feddb
 from datetime import datetime
 from .models import Feddb
 from .func import check_if_current, fed_type
+import pytz
 
 fedApi = Blueprint('data', __name__)
+
+timezone = pytz.timezone('America/New_York')
 
 @fedApi.route('/isfed', methods=['GET'])
 def is_fed():
@@ -34,7 +37,7 @@ def set_status():
       db.session.commit()
       replaced = True
 
-  fed = Feddb(fed_type(), datetime.now())
+  fed = Feddb(fed_type(), datetime.now(timezone))
   db.session.add(fed)
   db.session.commit()
   return jsonify({'Added': fed.to_dict(), 'replaced': replaced}), 200
