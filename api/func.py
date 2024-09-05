@@ -4,6 +4,7 @@ import pytz
 timezone = pytz.timezone('America/New_York')
 
 def check_if_current(fedtype: str, fedDate: datetime):
+  fedDate = pytz.utc.localize(fedDate).astimezone(timezone)
   now = datetime.now(timezone)
 
   if fedDate.date() != now.date():
