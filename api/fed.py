@@ -1,56 +1,66 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, request, jsonify
 from . import db
 from .models import Feddb
 from datetime import datetime
 from .models import Feddb
-from .func import check_if_current, fed_type
 import pytz
 
-fedApi = Blueprint('data', __name__)
+fedApi = Blueprint('fed', __name__)
 
 timezone = pytz.timezone('America/New_York')
 
-@fedApi.route('/isfed', methods=['GET'])
-def is_fed():
-  if Feddb.query.count() != 0:
-    lastFed = Feddb.query.order_by(Feddb.id.desc()).first()
-    current = check_if_current(lastFed.fedtype, lastFed.timestamp)
-    return jsonify({'isFed': current}) 
-
-  return jsonify({'isFed': False}) 
-
-
 @fedApi.route('/fed', methods=['GET'])
 def get_status():
-  feeds = Feddb.query.all()
+  limit = request.args.get('limit', default=None, type=int)
+  query_type = request.args.get('type', default=None, type=str)
+  query = Feddb.query.order_by(Feddb.timestamp.desc())
+  
+  if query_type is not None:
+    query = query.filter(Feddb.fedtype == query_type)
+  if limit is not None:
+    query = query.limit(limit)
+
+  feeds = query.all()
+
   return jsonify([feed.to_dict() for feed in feeds]), 200
 
 
 @fedApi.route('/fed', methods=['POST'])
 def set_status():
+  info = request.json
+  fed_type = info.get('type')
 
-  replaced = False
-  if Feddb.query.count() != 0:
-    lastFed = Feddb.query.order_by(Feddb.id.desc()).first()
-    if check_if_current(lastFed.fedtype, lastFed.timestamp):
-      db.session.delete(lastFed)
-      db.session.commit()
-      replaced = True
+  if fed_type is None:
+    return jsonify({'error': 'Missing required field: type'}), 400
 
-  fed = Feddb(fed_type(), datetime.now(timezone))
+  fed = Feddb(fed_type, datetime.now(timezone))
   db.session.add(fed)
   db.session.commit()
-  return jsonify({'Added': fed.to_dict(), 'replaced': replaced}), 200
+  return jsonify({'Added': fed.to_dict()}), 200
 
 
 @fedApi.route('/fed', methods=['DELETE'])
 def delete_status():
-  if Feddb.query.count() != 0:
-    lastFed = Feddb.query.order_by(Feddb.id.desc()).first()
-    if check_if_current(lastFed.fedtype, lastFed.timestamp):
-      db.session.delete(lastFed)
-      db.session.commit()
-      return jsonify({'deleted': lastFed.to_dict()})
-    
-  return jsonify({'deleted': 'none'})
+  info = request.json
+  ids = info.get('id')
 
+  if ids is None:
+    return jsonify({'error': 'Missing required field: id'}), 400
+
+  if not isinstance(ids, list):
+    return jsonify({'error': 'Field "id" must be a list'}), 400
+
+  if not all(isinstance(item, (int)) and not isinstance(item, bool) for item in ids):
+    return jsonify({'error': 'All elements in the list must be an integer'}), 400
+
+  deleted = []
+  for id in ids:
+    print(id)
+    item = Feddb.query.get(id)
+    if item:
+        db.session.delete(item)
+        deleted.append(id)
+
+  db.session.commit()
+
+  return jsonify({'deleted': deleted})
