@@ -17,9 +17,13 @@ def create_app():
   CORS(app)
 
   from .fed import fedApi
-  from .models import Feddb
+  from .med import medApi
+  from .log import logApi
+  from .models import Feddb, Meddb, Logdb
 
   app.register_blueprint(fedApi)
+  app.register_blueprint(medApi)
+  app.register_blueprint(logApi)
 
   with app.app_context():
       db.create_all()
