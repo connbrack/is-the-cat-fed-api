@@ -2,19 +2,19 @@ from flask import Blueprint, request, jsonify
 from . import db
 from .models import Feddb
 from datetime import datetime
-from .models import Feddb
 import pytz
 
 fedApi = Blueprint('fed', __name__)
 
 timezone = pytz.timezone('America/New_York')
 
+
 @fedApi.route('/fed', methods=['GET'])
 def get_status():
   limit = request.args.get('limit', default=None, type=int)
   query_type = request.args.get('type', default=None, type=str)
   query = Feddb.query.order_by(Feddb.timestamp.desc())
-  
+
   if query_type is not None:
     query = query.filter(Feddb.fedtype == query_type)
   if limit is not None:
@@ -58,8 +58,8 @@ def delete_status():
     print(id)
     item = Feddb.query.get(id)
     if item:
-        db.session.delete(item)
-        deleted.append(id)
+      db.session.delete(item)
+      deleted.append(id)
 
   db.session.commit()
 

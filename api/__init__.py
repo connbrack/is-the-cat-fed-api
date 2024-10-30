@@ -6,8 +6,9 @@ from flask_cors import CORS
 from dotenv import load_dotenv
 load_dotenv()
 
-db=SQLAlchemy()
+db = SQLAlchemy()
 dbURL = str(os.getenv('dbURL'))
+
 
 def create_app():
   app = Flask(__name__)
@@ -26,6 +27,6 @@ def create_app():
   app.register_blueprint(logApi)
 
   with app.app_context():
-      db.create_all()
+    db.create_all()
 
   return app
