@@ -1,6 +1,5 @@
 from flask import Blueprint, request, jsonify
 from . import db
-from .models import Logdb
 from datetime import datetime
 from .models import Logdb
 import pytz
@@ -9,12 +8,13 @@ logApi = Blueprint('log', __name__)
 
 timezone = pytz.timezone('America/New_York')
 
+
 @logApi.route('/log', methods=['GET'])
 def get_status():
   limit = request.args.get('limit', default=None, type=int)
   query_type = request.args.get('type', default=None, type=str)
   query = Logdb.query.order_by(Logdb.timestamp.desc())
-  
+
   if query_type is not None:
     query = query.filter(Logdb.logtype == query_type)
   if limit is not None:
@@ -58,8 +58,8 @@ def delete_status():
     print(id)
     item = Logdb.query.get(id)
     if item:
-        db.session.delete(item)
-        deleted.append(id)
+      db.session.delete(item)
+      deleted.append(id)
 
   db.session.commit()
 

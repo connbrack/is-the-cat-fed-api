@@ -1,5 +1,6 @@
 from . import db
 
+
 class Feddb(db.Model):
   id = db.Column(db.Integer, primary_key=True)
   fedtype = db.Column(db.String)
@@ -58,4 +59,3 @@ class Logdb(db.Model):
         "logtype": self.logtype,
         "timestamp": self.timestamp,
     }
-

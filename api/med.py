@@ -8,12 +8,13 @@ medApi = Blueprint('med', __name__)
 
 timezone = pytz.timezone('America/New_York')
 
+
 @medApi.route('/med', methods=['GET'])
 def get_status():
   limit = request.args.get('limit', default=None, type=int)
   query_type = request.args.get('type', default=None, type=str)
   query = Meddb.query.order_by(Meddb.timestamp.desc())
-  
+
   if query_type is not None:
     query = query.filter(Meddb.medtype == query_type)
   if limit is not None:
@@ -22,6 +23,7 @@ def get_status():
   feeds = query.all()
 
   return jsonify([feed.to_dict() for feed in feeds]), 200
+
 
 @medApi.route('/med', methods=['POST'])
 def set_status():
@@ -35,6 +37,7 @@ def set_status():
   db.session.add(med)
   db.session.commit()
   return jsonify({'Added': med.to_dict()}), 200
+
 
 @medApi.route('/med', methods=['DELETE'])
 def delete_status():
@@ -55,8 +58,8 @@ def delete_status():
     print(id)
     item = Meddb.query.get(id)
     if item:
-        db.session.delete(item)
-        deleted.append(id)
+      db.session.delete(item)
+      deleted.append(id)
 
   db.session.commit()
 
